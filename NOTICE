@@ -1,0 +1,30 @@
+swift-protobuf-json
+Copyright (c) 2026 Karrot
+
+------------------------------------------------------------------------
+
+This product includes software developed at Apple Inc.
+(https://github.com/apple/swift-protobuf):
+
+    Copyright (c) 2014 - 2025 Apple Inc. and the project authors
+
+    Licensed under Apache License v2.0 with Runtime Library Exception.
+    See https://github.com/apple/swift-protobuf/blob/main/LICENSE.txt.
+
+Specifically:
+
+  * `SwiftProtobufPluginLibrary` is imported as a build-time dependency
+    and provides the `FileDescriptor` / `SwiftProtobufNamer` /
+    `CodePrinter` abstractions this plugin builds on. Its source is not
+    redistributed in this repository; binaries we ship link it
+    statically.
+
+  * `protoc-gen-swift` is invoked at run time as a separate executable
+    (the user must install it themselves; this plugin locates it via
+    the `PROTOC_GEN_SWIFT` environment variable, a sibling binary, or
+    `PATH`). We do not redistribute the Apple binary; we just call it.
+
+  * The output emitted by this plugin includes verbatim text produced
+    by `protoc-gen-swift`. That text remains under Apple's Apache 2.0
+    license; the `Decodable` extensions appended after the `// MARK: -
+    JSON Decodable` marker are this project's own contribution.

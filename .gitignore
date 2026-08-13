@@ -1,0 +1,23 @@
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+*.xcodeproj/
+
+# Xcode
+DerivedData/
+xcuserdata/
+
+# macOS
+.DS_Store
+
+# Generated outputs (examples)
+Examples/**/Generated/
+
+# Common proto deps installed via scripts/install-common-protos.sh
+.proto-deps/
+
+# Editor
+.vscode/
+.idea/
+*.swp

@@ -1,0 +1,12 @@
+// Phase-1 scalar fixture for swift-protobuf-json's golden test harness.
+// Kept intentionally small (string + int32) so the trimmed MessageEmitter's
+// output stays easy to read at a glance. Wider scalar coverage lands together
+// with Phase-2 emitters.
+syntax = "proto3";
+
+package goldens;
+
+message Scalars {
+  string name = 1;
+  int32 count = 2;
+}

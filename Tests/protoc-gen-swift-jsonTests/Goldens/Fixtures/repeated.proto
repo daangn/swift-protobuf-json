@@ -1,0 +1,15 @@
+// Repeated coverage:
+// - repeated scalar
+// - repeated message
+syntax = "proto3";
+
+package goldens;
+
+message Tag {
+  string label = 1;
+}
+
+message Article {
+  repeated string keywords = 1;
+  repeated Tag tags = 2;
+}

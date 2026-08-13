@@ -1,0 +1,24 @@
+// proto3 explicit-presence coverage. Each `optional` scalar/enum is
+// backed by Apple with a `_<name>: T?` storage plus `hasXxx` / `clearXxx`
+// accessors. The Decodable emitter must preserve that presence: a missing
+// key has to leave `hasXxx == false`, not eagerly materialize the proto3
+// zero. `plain` is a singular proto3 scalar (no presence) kept as a
+// contrast — it should still collapse to the proto3 default when absent.
+syntax = "proto3";
+
+package goldens;
+
+enum Shade {
+  SHADE_UNSPECIFIED = 0;
+  SHADE_LIGHT = 1;
+  SHADE_DARK = 2;
+}
+
+message Settings {
+  optional string nickname = 1;
+  optional int32 retries = 2;
+  optional int64 byte_budget = 3;
+  optional bool muted = 4;
+  optional Shade shade = 5;
+  string plain = 6;
+}

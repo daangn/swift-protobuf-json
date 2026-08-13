@@ -1,0 +1,14 @@
+// Imports a message defined in library.proto and uses it as a field
+// type. Confirms our DecodableEmitter walks descriptor.dependencies
+// correctly and the resulting Decodable extension references the
+// fully-qualified Swift name produced by Apple.
+syntax = "proto3";
+
+package goldens;
+
+import "library.proto";
+
+message Book {
+  string title = 1;
+  Author author = 2;
+}

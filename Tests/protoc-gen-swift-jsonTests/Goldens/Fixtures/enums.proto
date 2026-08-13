@@ -1,0 +1,18 @@
+// Enum coverage:
+// - top-level proto3 (open) enum with a zero value
+// - enum used as a message field
+// - enum used in a repeated field
+syntax = "proto3";
+
+package goldens;
+
+enum Status {
+  STATUS_UNSPECIFIED = 0;
+  STATUS_ACTIVE = 1;
+  STATUS_INACTIVE = 2;
+}
+
+message Account {
+  Status status = 1;
+  repeated Status history = 2;
+}

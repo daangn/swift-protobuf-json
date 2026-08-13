@@ -1,0 +1,19 @@
+// 64-bit integer fixture for swift-protobuf-json's golden harness.
+//
+// proto3 JSON spec serialises the int64 family (int64/uint64/sint64/
+// fixed64/sfixed64) as JSON *strings* to dodge JavaScript's 2^53 safe-int
+// limit. This fixture exercises the emitter's number-or-string fallback
+// path (DecodableEmitter.isInt64ish). Field names are intentionally
+// multi-word so the snakeCase CodingKey variant is observable.
+syntax = "proto3";
+
+package goldens;
+
+message Int64s {
+  int64 user_id = 1;
+  uint64 byte_size = 2;
+  sint64 delta_value = 3;
+  fixed64 content_hash = 4;
+  sfixed64 file_offset = 5;
+  repeated int64 child_ids = 6;
+}

@@ -1,0 +1,20 @@
+// Oneof coverage:
+// - oneof with scalar members
+// - oneof with a message member
+syntax = "proto3";
+
+package goldens;
+
+message Image {
+  string url = 1;
+}
+
+message Notification {
+  string title = 1;
+
+  oneof body {
+    string text = 2;
+    int32 numeric_code = 3;
+    Image image = 4;
+  }
+}

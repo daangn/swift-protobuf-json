@@ -1,0 +1,24 @@
+// Copy-on-write storage coverage.
+//
+// Apple's protoc-gen-swift spills a message into a heap `_StorageClass`
+// when it has a singular (non-repeated) message field that recurses back
+// to itself, or when its fields' total cost crosses an internal threshold.
+// A singular self-reference is the smallest, clearest trigger — note this
+// is distinct from `nested.proto`'s Tree.Node, whose self-reference is
+// `repeated` and therefore does NOT spill to storage.
+//
+// The struct body Apple keeps above the runtime marker projects every
+// property through `_storage` / `_uniqueStorage()`, whose definitions live
+// in the binary-conformance extension below the marker. StorageSalvager
+// must rescue them or the stripped output references an undefined
+// `_uniqueStorage()` and won't compile. This fixture is the regression
+// guard for that salvage (and for recognising Apple's `nonisolated
+// extension` form).
+syntax = "proto3";
+
+package goldens;
+
+message LinkedNode {
+  string value = 1;
+  LinkedNode next = 2;
+}

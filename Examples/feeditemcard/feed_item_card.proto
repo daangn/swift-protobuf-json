@@ -1,0 +1,26 @@
+// Example proto modeling a generic feed-item card. Intentionally
+// minimal — three field shapes (scalar, enum, repeated message) plus a
+// nested type — to show the plugin's output without drowning the reader.
+syntax = "proto3";
+
+package example.feed.v1;
+
+enum CardKind {
+  CARD_KIND_UNSPECIFIED = 0;
+  CARD_KIND_ARTICLE = 1;
+  CARD_KIND_VIDEO = 2;
+  CARD_KIND_STICKER = 3;
+}
+
+message FeedItemCard {
+  string id = 1;
+  CardKind kind = 2;
+  string title = 3;
+
+  message Section {
+    string header = 1;
+    repeated string body_lines = 2;
+  }
+
+  repeated Section sections = 4;
+}

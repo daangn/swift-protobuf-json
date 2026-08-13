@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: swift test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # macOS picks up Swift via Xcode; Linux uses the official image.
+        os: [macos-15, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Swift (Linux)
+        if: runner.os == 'Linux'
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.1"
+
+      - name: Print Swift version
+        run: swift --version
+
+      - name: Build (release)
+        run: swift build -c release --product protoc-gen-swift-json
+
+      - name: Test
+        run: swift test
+
+  fixtures:
+    # Verifies that scripts/regen-goldens.sh is idempotent: re-running it
+    # against the checked-in .proto files must reproduce the checked-in
+    # .descriptorset / apple.pb.swift / Expected / DecodingFixtures
+    # files byte-for-byte. Drift means somebody hand-edited a generated
+    # artifact.
+    name: regen-goldens is idempotent
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.1"
+
+      # Pinned protoc release (deterministic): regen-goldens output must
+      # be reproducible across runs, so the protoc version is fixed here
+      # rather than tracking a package manager's latest.
+      - name: Install protoc
+        run: |
+          PROTOC_VERSION=28.3
+          curl -sSL -o /tmp/protoc.zip \
+            "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-x86_64.zip"
+          sudo unzip -o -q /tmp/protoc.zip -d /usr/local 'bin/protoc' 'include/*'
+          protoc --version
+
+      - name: Run regen-goldens
+        run: scripts/regen-goldens.sh
+
+      - name: Assert no drift
+        run: |
+          if ! git diff --exit-code Tests/protoc-gen-swift-jsonTests; then
+            echo "::error::regen-goldens produced different artifacts than the checked-in copies. Re-run \`make regen-goldens\` locally and commit the result."
+            exit 1
+          fi

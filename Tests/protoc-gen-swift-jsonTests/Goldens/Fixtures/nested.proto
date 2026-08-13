@@ -1,0 +1,23 @@
+// Nested type coverage:
+// - nested message inside a message (with its own field referencing
+//   itself and the outer message)
+// - nested enum inside a message
+syntax = "proto3";
+
+package goldens;
+
+message Tree {
+  message Node {
+    string id = 1;
+    repeated Node children = 2;
+  }
+
+  enum Kind {
+    KIND_UNSPECIFIED = 0;
+    KIND_BINARY = 1;
+    KIND_NARY = 2;
+  }
+
+  Node root = 1;
+  Kind kind = 2;
+}

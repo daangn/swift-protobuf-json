@@ -1,0 +1,16 @@
+// proto2 closed-enum coverage: Apple emits a closed Int-raw-value enum
+// with no UNRECOGNIZED case, so DecodableEmitter must take a different
+// fallback path for unknown wire values.
+syntax = "proto2";
+
+package goldens;
+
+enum Color {
+  RED = 0;
+  GREEN = 1;
+  BLUE = 2;
+}
+
+message Pixel {
+  optional Color color = 1;
+}

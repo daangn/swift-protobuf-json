@@ -1,0 +1,11 @@
+// Cross-file dependency coverage:
+// - `Author` defined here is referenced by Book in books.proto
+// - Tests that our emit handles a type that lives in a different file
+//   within the same package and same generation target
+syntax = "proto3";
+
+package goldens;
+
+message Author {
+  string name = 1;
+}

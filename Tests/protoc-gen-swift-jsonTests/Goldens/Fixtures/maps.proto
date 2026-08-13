@@ -1,0 +1,17 @@
+// Map coverage:
+// - map<string, int32>
+// - map<int32, string>
+// - map<string, Message>
+syntax = "proto3";
+
+package goldens;
+
+message Cell {
+  string value = 1;
+}
+
+message Sheet {
+  map<string, int32> counts = 1;
+  map<int32, string> labels = 2;
+  map<string, Cell> grid = 3;
+}
