@@ -1,0 +1,123 @@
+name: Release Linux binaries
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    container:
+      image: swift:6.1-noble
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build and package
+        run: |
+          set -euo pipefail
+          swift build -c release --product protoc-gen-swift-json
+          swift build -c release --product protoc-gen-swift \
+            --package-path .build/checkouts/swift-protobuf
+
+          mkdir -p dist/bundle/licenses
+          install -m 0755 .build/release/protoc-gen-swift-json dist/bundle/
+          install -m 0755 \
+            .build/checkouts/swift-protobuf/.build/release/protoc-gen-swift \
+            dist/bundle/
+          cp LICENSE NOTICE dist/bundle/
+          cp .build/checkouts/swift-protobuf/LICENSE.txt \
+            dist/bundle/licenses/swift-protobuf-LICENSE.txt
+
+          if [[ "$GITHUB_REF_TYPE" == 'tag' ]]; then
+            expected_version="${GITHUB_REF_NAME#v}"
+            actual_version=$(dist/bundle/protoc-gen-swift-json --version | awk '{print $2}')
+            test "$actual_version" = "$expected_version"
+          fi
+
+          ref_slug="${GITHUB_REF_NAME//\//-}"
+          asset="swift-protobuf-json-${ref_slug}-linux-x86_64-ubuntu24.04.tar.gz"
+          tar -czf "dist/$asset" -C dist/bundle .
+          (cd dist && sha256sum "$asset" > "$asset.sha256")
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-assets
+          path: |
+            dist/*.tar.gz
+            dist/*.sha256
+
+  smoke:
+    needs: build
+    runs-on: ubuntu-24.04
+    container:
+      image: swift:6.1-noble
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: dist
+
+      - name: Verify packaged binaries
+        run: |
+          set -euo pipefail
+          apt-get update -qq
+          apt-get install -y --no-install-recommends curl unzip
+
+          (cd dist && sha256sum -c -- ./*.sha256)
+          mkdir -p dist/extracted dist/out dist/protoc
+          tar -xzf dist/*.tar.gz -C dist/extracted
+          test -x dist/extracted/protoc-gen-swift-json
+          test -x dist/extracted/protoc-gen-swift
+          if ldd dist/extracted/protoc-gen-swift-json | grep -q 'not found'; then
+            exit 1
+          fi
+          if ldd dist/extracted/protoc-gen-swift | grep -q 'not found'; then
+            exit 1
+          fi
+
+          curl -fsSL -o dist/protoc.zip \
+            https://github.com/protocolbuffers/protobuf/releases/download/v28.3/protoc-28.3-linux-x86_64.zip
+          unzip -q dist/protoc.zip 'bin/protoc' -d dist/protoc
+
+          fixture_root="$PWD/Tests/protoc-gen-swift-jsonTests/Goldens"
+          for proto in "$fixture_root"/Fixtures/*.proto; do
+            name=$(basename "$proto" .proto)
+            rm -f dist/out/*.pb.swift
+            dist/protoc/bin/protoc \
+              --plugin=protoc-gen-swift-json="$PWD/dist/extracted/protoc-gen-swift-json" \
+              --swift-json_out="$PWD/dist/out" \
+              --proto_path="$fixture_root/Fixtures" \
+              "$proto"
+            cmp "$fixture_root/Expected/$name.pb.swift" "dist/out/$name.pb.swift"
+          done
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: smoke
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: dist
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --verify-tag \
+            --generate-notes
