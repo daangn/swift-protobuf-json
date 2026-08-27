@@ -15,7 +15,7 @@ import SwiftProtobufPluginLibrary
 @main
 struct ProtocGenSwiftJSON: CodeGenerator {
 
-  var version: String? { "0.4.0-dev" }
+  var version: String? { "1.0.1" }
 
   var projectURL: String? { "https://github.com/daangn/swift-protobuf-json" }
 

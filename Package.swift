@@ -25,7 +25,7 @@ let package = Package(
     // build-time dep.
     .package(
       url: "https://github.com/apple/swift-protobuf.git",
-      from: "1.30.0"
+      exact: "1.38.1"
     ),
   ],
   targets: [

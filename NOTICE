@@ -9,7 +9,7 @@ This product includes software developed at Apple Inc.
     Copyright (c) 2014 - 2025 Apple Inc. and the project authors
 
     Licensed under Apache License v2.0 with Runtime Library Exception.
-    See https://github.com/apple/swift-protobuf/blob/main/LICENSE.txt.
+    See https://github.com/apple/swift-protobuf/blob/1.38.1/LICENSE.txt.
 
 Specifically:
 
@@ -19,10 +19,11 @@ Specifically:
     redistributed in this repository; binaries we ship link it
     statically.
 
-  * `protoc-gen-swift` is invoked at run time as a separate executable
-    (the user must install it themselves; this plugin locates it via
-    the `PROTOC_GEN_SWIFT` environment variable, a sibling binary, or
-    `PATH`). We do not redistribute the Apple binary; we just call it.
+  * `protoc-gen-swift` is invoked at run time as a separate executable.
+    Release archives include an unmodified binary built from
+    apple/swift-protobuf 1.38.1. It remains licensed under Apple's Apache
+    License v2.0 with Runtime Library Exception; the license text is
+    included at `licenses/swift-protobuf-LICENSE.txt`.
 
   * The output emitted by this plugin includes verbatim text produced
     by `protoc-gen-swift`. That text remains under Apple's Apache 2.0
