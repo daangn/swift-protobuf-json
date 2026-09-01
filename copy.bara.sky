@@ -1,0 +1,34 @@
+public_files = glob([
+    ".github/workflows/ci.yml",
+    ".gitignore",
+    "Examples/**",
+    "LICENSE",
+    "Makefile",
+    "NOTICE",
+    "Package.swift",
+    "README.md",
+    "Sources/**",
+    "Tests/**",
+    "copy.bara.sky",
+    "scripts/**",
+])
+
+core.workflow(
+    name = "export",
+    origin = git.origin(
+        url = "https://github.com/karrot-emu/swift-protobuf-json.git",
+        ref = "main",
+    ),
+    destination = git.destination(
+        url = "https://github.com/daangn/swift-protobuf-json.git",
+        fetch = "main",
+        push = "main",
+    ),
+    origin_files = public_files,
+    destination_files = public_files,
+    authoring = authoring.overwrite(
+        "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>",
+    ),
+    mode = "SQUASH",
+    check_last_rev_state = True,
+)
